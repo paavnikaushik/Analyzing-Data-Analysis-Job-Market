@@ -1,41 +1,143 @@
-####Data Analyst Job Market Insights using SQL
+# Introduction
+Diving deep into the data analysis job market, exploring top paying jobs and in-demand skills and where high demand meets high salary in india and globally.
+For queries, click on the file : [project folder](/project/)
+# Background
+This project was born from a desire to pinpoint top paid and in-demand skills. Data contains information on job titles, locations, salaries, and essential skills.
+### Questions I wanted to answer:
+1. What are top-paying data analysis jobs?
+2. What skills are required for these jobs in India and globally?
+3. What skills are in demand and associated with higher salaries in India?
+4. What are most optimal skills to learn?
+# Tools Used
+1. **SQL**: Querying the database and drawing insights
+2. **PostgreSQL**: Chosen Database Management System
+3. **Visual Studio Code**: The chosen IDE
+4. **Git and GitHub**: For sharing the repository
+# Analysis
+Aim was to know more about the data analysis job market, here's how each question was approached:
+### 1. Top Paying Data Analyst Jobs:
+Filtered data analyst postions by average yearly salary and location, focusing on India.
+```sql
 
-#This project leverages SQL to analyze global and Indian job market data for **Data Analyst** roles. 
-#The objective is to uncover the top-paying and most in-demand skills, providing valuable insights for aspiring and current data professionals.
+SELECT
+        job_id,
+        job_title_short,
+        job_location,
+        job_schedule_type,
+        salary_year_avg,
+        job_posted_date,
+        company_dim.name AS company_name
+FROM
+        job_postings_fact
+LEFT JOIN company_dim ON company_dim.company_id=job_postings_fact.company_id
+WHERE 
+        job_title_short='Data Analyst' AND
+        job_location LIKE '%India' AND
+        salary_year_avg IS NOT NULL
+ORDER BY
+        salary_year_avg DESC
+LIMIT 20;
 
-##Project Objective
+```
+### Findings:
 
-To understand the current skill demand and salary trends for Data Analyst roles by exploring a large job postings dataset using SQL,
-helping professionals make informed decisions about skill development and career strategy.
+Sure! Here are **3 concise insights**:
 
-##Dataset
+1. **Top-paying role** is at **ServiceNow, Hyderabad** with an average salary of **₹1,77,283/year**.  
+2. **Hyderabad and Bengaluru** are the leading cities for high-paying Data Analyst jobs.  
+3. Companies like **Bosch Group** and **Eagle Genomics Ltd** have **multiple listings**, suggesting active hiring.
 
-#The dataset includes job postings from various countries and domains, covering:
-#- Job titles and descriptions
-#- Skills required per job
-#- Salaries (annual average)
-#- Locations and employment types
 
-##Key Analyses
+### 2. Top paying job skills
+This query retrieves the top 10 highest-paying Data Analyst jobs in India along with the companies and required skills by joining job, company, and skills-related tables.
+```sql
+WITH top_paying_jobs AS(
+SELECT
+        job_id,
+        job_title_short,
+        salary_year_avg,
+        company_dim.name AS company_name
+FROM
+        job_postings_fact
+LEFT JOIN company_dim ON company_dim.company_id=job_postings_fact.company_id
+WHERE 
+        job_title_short='Data Analyst' AND
+        job_location LIKE '%India' AND
+        salary_year_avg IS NOT NULL
+ORDER BY
+        salary_year_avg DESC
+LIMIT 10
+)
 
-#1. Top Paying Skills (India + Global) 
-   #Identified the skills that are associated with the highest average salaries using SQL aggregation and joins.
+SELECT top_paying_jobs.*,skills
+FROM top_paying_jobs
+INNER JOIN skills_job_dim ON skills_job_dim.job_id=top_paying_jobs.job_id
+INNER JOIN skills_dim ON skills_dim.skill_id=skills_job_dim.skill_id
+ORDER BY salary_year_avg DESC;
+```
+### Findings:
+-Top-paying “Data Analyst” roles are actually hybrid roles closer to Data Engineering or Data Platform Engineering.
 
-#2. Most In-Demand Skills
-   #Ranked the most frequently requested skills in Data Analyst job postings.
+-Skills like Databricks, Snowflake, Airflow, Scala, Kafka fetch top salaries but require advanced backend/data infra skills.
 
-#3. Demand vs. Salary Comparison
-   #Merged both datasets to highlight skills that strike a balance between high demand and high pay.
+-Enterprise data tools like SAP and Oracle also command high pay in traditional companies.
 
-##Tools Used
+-Widely taught skills (e.g. SQL, Excel, Python) are essential but not enough for top-paying analyst roles.
 
-#SQL (PostgreSQL/BigQuery)– Data querying, joins, aggregations
-#Excel / Google Sheets – For data presentation and formatting
-#VS Code – Query execution and code organization
+### 3. Top Demanded Skills
 
-#Insights
+This query retrieves the top 10 most in-demand skills for Data Analyst roles by counting how many job postings mention each skill.
 
-#- Skills like SQL, Python, and Power BI appeared most frequently in job postings.
-#- Niche skills such as Snowflake, AWS, and GCP tend to offer higher average salaries.
-#- A sweet spot exists in learning high-paying yet in-demand tools such as Tableau, Airflow, and Looker.
+```sql
+SELECT skills, COUNT(skills_job_dim.job_id) AS demand_count
+FROM job_postings_fact
+INNER JOIN skills_job_dim ON job_postings_fact.job_id=skills_job_dim.job_id
+INNER JOIN skills_dim ON skills_job_dim.skill_id=skills_dim.skill_id
+WHERE job_title_short = 'Data Analyst'
+GROUP BY skills
+ORDER BY demand_count DESC
+limit 10
+```
+### Findings:
+Master the high-demand basics (SQL, Excel, Python), but sprinkle in some high-paying niche skills (e.g. Snowflake, Airflow, SAP) to maximize your earning potential.
+
+| Goal                     | Focus Skills                         |
+|--------------------------|--------------------------------------|
+| ✅ Get hired fast         | SQL, Excel, Tableau, Power BI        |
+| 💰 Earn higher salary     | Python, SAP, Snowflake, Airflow, Databricks |
+| 🚀 Stand out from crowd   | Cloud tools + Python + BI tools      |
+| 🔄 Transition to Data Engineering | Airflow, Kafka, Databricks, Pyspark  |
+
+### 4. Top Skills based on salary
+
+This query identifies the top 30 skills associated with the highest average salaries for Data Analyst roles by calculating the average salary for each skill from relevant job postings.
+```sql
+SELECT skills, ROUND(AVG(salary_year_avg),0) AS average_salary
+FROM job_postings_fact
+INNER JOIN skills_job_dim ON job_postings_fact.job_id=skills_job_dim.job_id
+INNER JOIN skills_dim ON skills_job_dim.skill_id=skills_dim.skill_id
+WHERE job_title_short = 'Data Analyst' AND
+        salary_year_avg IS NOT NULL
+GROUP BY skills
+ORDER BY average_salary  DESC
+limit 30
+```
+### Findings:
+- The intersection of data analytics and machine learning leads to higher pay.
+- Cloud and big data tools are associated with top-paying roles.
+- Core tools (SQL + Python) are essential at every level.
+
+
+# What I learned
+
+- Gained hands-on experience with **PostgreSQL** for querying and analyzing data  
+- Used **Visual Studio Code (VSCode)** as the primary code editor  
+- Learned to manage version control and collaborate using **GitHub**
+
+# Conclusions
+1. SQL, Excel, and Python are non-negotiables.
+
+2. Power BI and Tableau stand out for both reporting and salary returns.
+
+3. Cloud & big data tools (like Spark, Azure, AWS) add a significant salary boost, even if fewer roles explicitly ask for them.
 
