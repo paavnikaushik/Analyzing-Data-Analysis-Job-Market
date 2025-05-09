@@ -43,7 +43,7 @@ LIMIT 20;
 
 Sure! Here are **3 concise insights**:
 
-1. **Top-paying role** is at **ServiceNow, Hyderabad** with an average salary of **₹1,77,283/year**.  
+1. **Top-paying role** is at **ServiceNow, Hyderabad** with an average salary of **₹1,77,283/month**.  
 2. **Hyderabad and Bengaluru** are the leading cities for high-paying Data Analyst jobs.  
 3. Companies like **Bosch Group** and **Eagle Genomics Ltd** have **multiple listings**, suggesting active hiring.
 
